@@ -7,15 +7,17 @@ mvn clean install
 Login to bluemix using the cloudfoundry api, push the application.
 
 ```
-cf api https://console.ng.bluemix.net/
+cf api https://api.ng.bluemix.net/
 cf login
 cf push
 ```
 
+To debug the appliction use the following commands.
+
 ```
 cf logs springboot-bluemix-example
 cf events springboot-bluemix-example
-newrelic
 ```
 
+newrelic
 
