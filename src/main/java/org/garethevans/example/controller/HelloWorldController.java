@@ -25,5 +25,14 @@ public class HelloWorldController {
 		LOG.debug("home");
 		return "OK";
 	}
+	
+	@RequestMapping(value = "/hello", method = RequestMethod.GET)
+	@ResponseStatus(value = HttpStatus.OK)
+	@ResponseBody
+	public String hello() {
+		LOG.debug("hello");
+		return "hello world";
+	}
+
 
 }

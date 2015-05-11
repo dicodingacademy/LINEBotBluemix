@@ -1,9 +1,7 @@
 applications:
 - disk_quota: 512m
-  name: ${project.artifactId}
+  name: ${user.name}-${project.artifactId}
   path: target/${project.artifactId}-${project.version}.jar
   instances: 1
   memory: 512m
   buildpack: java_buildpack
-  services:
-  - newrelic
