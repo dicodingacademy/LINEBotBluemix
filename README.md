@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/garethjevans/springboot-bluemix-example.svg?branch=master)](https://travis-ci.org/garethjevans/springboot-bluemix-example)
+
 To build the application, clone the repository and build the app.
 
 ```
