@@ -1,7 +1,7 @@
 applications:
 - disk_quota: 512m
   name: ${user.name}-${project.artifactId}
-  path: target/${project.artifactId}-${project.version}.jar
+  path: target/${project.artifactId}-${project.version}-bin.zip
   instances: 1
   memory: 512m
   buildpack: java_buildpack

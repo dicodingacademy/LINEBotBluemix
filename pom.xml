@@ -13,6 +13,11 @@
 	<packaging>jar</packaging>
 	<properties>
 		<java.version>1.7</java.version>
+		<maven.plugin.appassembler.version>1.8.1</maven.plugin.appassembler.version>
+		<maven.plugin.appassembly.id>${project.artifactId}</maven.plugin.appassembly.id>
+		<maven.plugin.appassembly.mainclass>org.garethevans.example.Application</maven.plugin.appassembly.mainclass>
+		<maven.plugin.assembly.descriptor>src/main/assembly/assembly.xml</maven.plugin.assembly.descriptor>
+		<maven.plugin.assembly.version>2.5</maven.plugin.assembly.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -43,6 +48,30 @@
 	<build>
 		<plugins>
 			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>appassembler-maven-plugin</artifactId>
+				<version>${maven.plugin.appassembler.version}</version>
+				<configuration>
+					<repositoryLayout>flat</repositoryLayout>
+					<repositoryName>lib</repositoryName>
+					<programs>
+						<program>
+							<id>${maven.plugin.appassembly.id}</id>
+							<mainClass>${maven.plugin.appassembly.mainclass}</mainClass>
+						</program>
+					</programs>
+				</configuration>
+				<executions>
+					<execution>
+						<id>appassemble-scripts</id>
+						<goals>
+							<goal>assemble</goal>
+						</goals>
+						<phase>package</phase>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
 				<groupId>com.google.code.sortpom</groupId>
 				<artifactId>maven-sortpom-plugin</artifactId>
 				<version>2.1.0</version>
@@ -53,7 +82,7 @@
 					<nrOfIndentSpace>-1</nrOfIndentSpace>
 					<predefinedSortOrder>custom_1</predefinedSortOrder>
 					<sortDependencies>scope,groupId,artifactId</sortDependencies>
-					<sortPlugins>groupId,artifactId</sortPlugins>
+					<!--<sortPlugins>groupId,artifactId</sortPlugins>-->
 					<sortProperties>true</sortProperties>
 				</configuration>
 				<executions>
@@ -62,6 +91,29 @@
 							<goal>sort</goal>
 						</goals>
 						<phase>verify</phase>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<configuration>
+					<descriptors>
+						<descriptor>${maven.plugin.assembly.descriptor}</descriptor>
+					</descriptors>
+					<archive>
+						<manifest>
+							<mainClass>${maven.plugin.assembly.mainclass}</mainClass>
+						</manifest>
+					</archive>
+				</configuration>
+				<executions>
+					<execution>
+						<id>make-assembly</id>
+						<goals>
+							<goal>single</goal>
+						</goals>
+						<phase>package</phase>
 					</execution>
 				</executions>
 			</plugin>
@@ -86,10 +138,6 @@
 						</configuration>
 					</execution>
 				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
 		</plugins>
 	</build>
