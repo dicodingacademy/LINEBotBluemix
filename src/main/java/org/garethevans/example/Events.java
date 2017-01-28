@@ -1,4 +1,4 @@
-package com.dicoding.temanngoding;
+package org.garethevans.example;
 
 public class Events {
     public String type;

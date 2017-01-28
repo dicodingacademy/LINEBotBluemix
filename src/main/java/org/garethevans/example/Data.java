@@ -1,4 +1,4 @@
-package com.dicoding.temanngoding;
+package org.garethevans.example;
 
 /**
  * Created by root on 1/27/17.
