@@ -1,13 +1,21 @@
 package org.garethevans.example;
 
 import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.context.annotation.ComponentScan;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.boot.context.web.SpringBootServletInitializer;
 
-@EnableAutoConfiguration
-@ComponentScan("org.garethevans.example")
-public class Application {
-	public static void main(String[] args) {
+@SpringBootApplication
+public class Application extends SpringBootServletInitializer
+{
+	@Override
+	protected SpringApplicationBuilder configure(SpringApplicationBuilder app)
+	{
+		return app.sources(Application.class);
+	}
+
+	public static void main(String [] args)
+	{
 		SpringApplication.run(Application.class, args);
 	}
 }
