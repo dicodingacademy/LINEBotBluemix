@@ -13,11 +13,6 @@ import com.linecorp.bot.model.message.TextMessage;
 import com.linecorp.bot.model.message.template.CarouselColumn;
 import com.linecorp.bot.model.message.template.CarouselTemplate;
 import com.linecorp.bot.model.response.BotApiResponse;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
-import org.apache.http.impl.nio.client.HttpAsyncClients;
-import org.garethevans.example.Event;
 import org.garethevans.example.Payload;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -26,12 +21,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import retrofit2.Response;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.Arrays;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 
 @RestController
 @RequestMapping(value="/linebot")
@@ -44,20 +35,6 @@ public class LineBotController
     @Autowired
     @Qualifier("com.linecorp.channel_access_token")
     String lChannelAccessToken;
-
-    @RequestMapping(value = "/hello", method = RequestMethod.GET)
-    @ResponseStatus(value = HttpStatus.OK)
-    @ResponseBody
-    public String hello() {
-        return "hello world";
-    }
-
-    @RequestMapping(value = "/line", method = RequestMethod.GET)
-    @ResponseStatus(value = HttpStatus.OK)
-    @ResponseBody
-    public String line() {
-        return lChannelAccessToken;
-    }
 
     @RequestMapping(value="/callback", method=RequestMethod.POST)
     public ResponseEntity<String> callback(
@@ -82,57 +59,62 @@ public class LineBotController
 
         Gson gson = new Gson();
         Payload payload = gson.fromJson(aPayload, Payload.class);
-
-        //Variable initialization
+//
+//        //Variable initialization
         String msgText = " ";
-        String upload_url = " ";
-        String mJSON = " ";
+//        String upload_url = " ";
+//        String mJSON = " ";
         String idTarget = " ";
-        String eventType = payload.events[0].type;
-
-        //Get event's type
-        if (eventType.equals("join")){
-            if (payload.events[0].source.type.equals("group")){
-                replyToUser(payload.events[0].replyToken, "Hello Group");
-            }
-            if (payload.events[0].source.type.equals("room")){
-                replyToUser(payload.events[0].replyToken, "Hello Room");
-            }
-        } else if (eventType.equals("message")){    //Event's type is message
-            if (payload.events[0].source.type.equals("group")){
-                idTarget = payload.events[0].source.groupId;
-            } else if (payload.events[0].source.type.equals("room")){
-                idTarget = payload.events[0].source.roomId;
-            } else if (payload.events[0].source.type.equals("user")){
-                idTarget = payload.events[0].source.userId;
-            }
-
-            //Parsing message from user
-            if (!payload.events[0].message.type.equals("text")){
-                replyToUser(payload.events[0].replyToken, "Unknown message");
-            } else {
-                //Get movie data from OMDb API
-                msgText = payload.events[0].message.text;
-                msgText = msgText.toLowerCase();
-
-                if (!msgText.contains("bot leave")){
-                    try {
-                        getMovieData(msgText, payload, idTarget);
-                    } catch (IOException e) {
-                        System.out.println("Exception is raised ");
-                        e.printStackTrace();
-                    }
-                } else {
-                    if (payload.events[0].source.type.equals("group")){
-                        leaveGR(payload.events[0].source.groupId, "group");
-                    } else if (payload.events[0].source.type.equals("room")){
-                        leaveGR(payload.events[0].source.roomId, "room");
-                    }
-                }
-
-//                pushType(idTarget, msgText + " - " + payload.events[0].source.type);
-            }
+        try {
+            getMovieData(msgText, payload, idTarget);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
+//        String eventType = payload.events[0].type;
+//
+//        //Get event's type
+//        if (eventType.equals("join")){
+//            if (payload.events[0].source.type.equals("group")){
+//                replyToUser(payload.events[0].replyToken, "Hello Group");
+//            }
+//            if (payload.events[0].source.type.equals("room")){
+//                replyToUser(payload.events[0].replyToken, "Hello Room");
+//            }
+//        } else if (eventType.equals("message")){    //Event's type is message
+//            if (payload.events[0].source.type.equals("group")){
+//                idTarget = payload.events[0].source.groupId;
+//            } else if (payload.events[0].source.type.equals("room")){
+//                idTarget = payload.events[0].source.roomId;
+//            } else if (payload.events[0].source.type.equals("user")){
+//                idTarget = payload.events[0].source.userId;
+//            }
+//
+//            //Parsing message from user
+//            if (!payload.events[0].message.type.equals("text")){
+//                replyToUser(payload.events[0].replyToken, "Unknown message");
+//            } else {
+//                //Get movie data from OMDb API
+//                msgText = payload.events[0].message.text;
+//                msgText = msgText.toLowerCase();
+//
+//                if (!msgText.contains("bot leave")){
+//                    try {
+//                        getMovieData(msgText, payload, idTarget);
+//                    } catch (IOException e) {
+//                        System.out.println("Exception is raised ");
+//                        e.printStackTrace();
+//                    }
+//                } else {
+//                    if (payload.events[0].source.type.equals("group")){
+//                        leaveGR(payload.events[0].source.groupId, "group");
+//                    } else if (payload.events[0].source.type.equals("room")){
+//                        leaveGR(payload.events[0].source.roomId, "room");
+//                    }
+//                }
+//
+////                pushType(idTarget, msgText + " - " + payload.events[0].source.type);
+//            }
+//        }
 
         return new ResponseEntity<String>(HttpStatus.OK);
     }
@@ -152,72 +134,72 @@ public class LineBotController
 //        System.out.println("Text from User: " + title);
 
         // Act as client with GET method
-        String URI = "https://www.dicoding.com/public/api/events";
-        System.out.println("URI: " +  URI);
+//        String URI = "https://www.dicoding.com/public/api/events";
+//        System.out.println("URI: " +  URI);
+//
+//        String jObjGet = " ";
+//        CloseableHttpAsyncClient c = HttpAsyncClients.createDefault();
+//
+//        try{
+//            c.start();
+//            //Use HTTP Get to retrieve data
+//            HttpGet get = new HttpGet(URI);
+//
+//            Future<HttpResponse> future = c.execute(get, null);
+//            HttpResponse responseGet = future.get();
+//            System.out.println("HTTP executed");
+//            System.out.println("HTTP Status of response: " + responseGet.getStatusLine().getStatusCode());
+//
+//            // Get the response from the GET request
+//            BufferedReader brd = new BufferedReader(new InputStreamReader(responseGet.getEntity().getContent()));
+//
+//            StringBuffer resultGet = new StringBuffer();
+//            String lineGet = "";
+//            while ((lineGet = brd.readLine()) != null) {
+//                resultGet.append(lineGet);
+//            }
+//            System.out.println("Got result");
+//
+//            // Change type of resultGet to JSONObject
+//            jObjGet = resultGet.toString();
+//            System.out.println("OMDb responses: " + jObjGet);
+//        } catch (InterruptedException | ExecutionException e) {
+//            System.out.println("Exception is raised ");
+//            e.printStackTrace();
+//        } finally {
+//            c.close();
+//        }
 
-        String jObjGet = " ";
-        CloseableHttpAsyncClient c = HttpAsyncClients.createDefault();
-
-        try{
-            c.start();
-            //Use HTTP Get to retrieve data
-            HttpGet get = new HttpGet(URI);
-
-            Future<HttpResponse> future = c.execute(get, null);
-            HttpResponse responseGet = future.get();
-            System.out.println("HTTP executed");
-            System.out.println("HTTP Status of response: " + responseGet.getStatusLine().getStatusCode());
-
-            // Get the response from the GET request
-            BufferedReader brd = new BufferedReader(new InputStreamReader(responseGet.getEntity().getContent()));
-
-            StringBuffer resultGet = new StringBuffer();
-            String lineGet = "";
-            while ((lineGet = brd.readLine()) != null) {
-                resultGet.append(lineGet);
-            }
-            System.out.println("Got result");
-
-            // Change type of resultGet to JSONObject
-            jObjGet = resultGet.toString();
-            System.out.println("OMDb responses: " + jObjGet);
-        } catch (InterruptedException | ExecutionException e) {
-            System.out.println("Exception is raised ");
-            e.printStackTrace();
-        } finally {
-            c.close();
-        }
-
-        Gson mGson = new Gson();
-        Event event = mGson.fromJson(jObjGet, Event.class);
-        String owner = event.getData().get(0).getOwner_display_name();
-        String summary = event.getData().get(0).getSummary();
-        String description = event.getData().get(0).getDescription();
-        String link = event.getData().get(0).getLink();
-        String time = event.getData().get(0).getBegin_time() + " - " + event.getData().get(0).getEnd_time();
-        String address = event.getData().get(0).getAddress();
-        String image = event.getData().get(0).getImage_path();
-        String msgToUser = " ";
-
+//        Gson mGson = new Gson();
+//        Event event = mGson.fromJson(jObjGet, Event.class);
+//        String owner = event.getData().get(0).getOwner_display_name();
+//        String summary = event.getData().get(0).getSummary();
+//        String description = event.getData().get(0).getDescription();
+//        String link = event.getData().get(0).getLink();
+//        String time = event.getData().get(0).getBegin_time() + " - " + event.getData().get(0).getEnd_time();
+//        String address = event.getData().get(0).getAddress();
+//        String image = event.getData().get(0).getImage_path();
+//        String msgToUser = " ";
         //Check user's request
         if (userTxt.contains("name")){
-            pushMessage(targetID, event.getData().get(0).getName());
-        } else if (userTxt.contains("summary")){
-            pushMessage(targetID, summary);
-        } else if (userTxt.contains("description")){
-            pushMessage(targetID, description);
-        } else if (userTxt.contains("time")){
-            pushMessage(targetID, time);
-        } else if (userTxt.contains("address")){
-            pushMessage(targetID, address);
-        } else if (userTxt.contains("owner")){
-            pushMessage(targetID, owner);
+            pushMessage(targetID, "name");
         }
-        else if (userTxt.contains("event")){
-            carouselForUser(image, ePayload.events[0].source.userId, owner, link);
-        }
+//        else if (userTxt.contains("summary")){
+//            pushMessage(targetID, summary);
+//        } else if (userTxt.contains("description")){
+//            pushMessage(targetID, description);
+//        } else if (userTxt.contains("time")){
+//            pushMessage(targetID, time);
+//        } else if (userTxt.contains("address")){
+//            pushMessage(targetID, address);
+//        } else if (userTxt.contains("owner")){
+//            pushMessage(targetID, owner);
+//        }
+//        else if (userTxt.contains("event")){
+//            carouselForUser(image, ePayload.events[0].source.userId, owner, link);
+//        }
 
-        System.out.println("Message to user: " + image);
+//        System.out.println("Message to user: " + image);
 
 //        //Check whether response successfully retrieve or not
 //        if (msgToUser.length() <= 11 || !ePayload.events[0].message.type.equals("text")){
@@ -285,12 +267,7 @@ public class LineBotController
                                 (poster_url, title, "Select one for more info", Arrays.asList
                                         (new MessageAction("Summary", "summary"),
                                                 new MessageAction("Description", "description"),
-                                                new URIAction("Link", uri))),
-                        new CarouselColumn
-                                (poster_url, title, "Select one for more info", Arrays.asList
-                                        (new MessageAction("Time", "time"),
-                                                new MessageAction("Address", "address"),
-                                                new URIAction("owner", uri)))));
+                                                new URIAction("Link", uri)))));
         TemplateMessage templateMessage = new TemplateMessage("Your search result", carouselTemplate);
         PushMessage pushMessage = new PushMessage(sourceId,templateMessage);
         try {
