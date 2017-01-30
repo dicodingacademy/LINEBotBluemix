@@ -33,12 +33,10 @@ import java.util.Arrays;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
-/**
- * Created by root on 1/29/17.
- */
 @RestController
 @RequestMapping(value="/linebot")
-public class LineBotController {
+public class LineBotController
+{
     @Autowired
     @Qualifier("com.linecorp.channel_secret")
     String lChannelSecret;
@@ -47,7 +45,21 @@ public class LineBotController {
     @Qualifier("com.linecorp.channel_access_token")
     String lChannelAccessToken;
 
-    @RequestMapping(value="/callback", method= RequestMethod.POST)
+    @RequestMapping(value = "/hello", method = RequestMethod.GET)
+    @ResponseStatus(value = HttpStatus.OK)
+    @ResponseBody
+    public String hello() {
+        return "hello world";
+    }
+
+    @RequestMapping(value = "/line", method = RequestMethod.GET)
+    @ResponseStatus(value = HttpStatus.OK)
+    @ResponseBody
+    public String line() {
+        return lChannelAccessToken;
+    }
+
+    @RequestMapping(value="/callback", method=RequestMethod.POST)
     public ResponseEntity<String> callback(
             @RequestHeader("X-Line-Signature") String aXLineSignature,
             @RequestBody String aPayload)
@@ -125,6 +137,7 @@ public class LineBotController {
         return new ResponseEntity<String>(HttpStatus.OK);
     }
 
+    //Method for get movie data from OMDb API
     private void getMovieData(String title, Payload ePayload, String targetID) throws IOException{
         String userTxt = title;
 
@@ -272,12 +285,12 @@ public class LineBotController {
                                 (poster_url, title, "Select one for more info", Arrays.asList
                                         (new MessageAction("Summary", "summary"),
                                                 new MessageAction("Description", "description"),
-                                                new URIAction("Link", uri)))));
-//                        new CarouselColumn
-//                                (poster_url, title, "Select one for more info", Arrays.asList
-//                                        (new MessageAction("Time", "time"),
-//                                                new MessageAction("Address", "address"),
-//                                                new MessageAction("Owner", "owner")))));
+                                                new URIAction("Link", uri))),
+                        new CarouselColumn
+                                (poster_url, title, "Select one for more info", Arrays.asList
+                                        (new MessageAction("Time", "time"),
+                                                new MessageAction("Address", "address"),
+                                                new URIAction("owner", uri)))));
         TemplateMessage templateMessage = new TemplateMessage("Your search result", carouselTemplate);
         PushMessage pushMessage = new PushMessage(sourceId,templateMessage);
         try {
