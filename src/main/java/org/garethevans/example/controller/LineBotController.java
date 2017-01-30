@@ -59,62 +59,57 @@ public class LineBotController
 
         Gson gson = new Gson();
         Payload payload = gson.fromJson(aPayload, Payload.class);
-//
-//        //Variable initialization
+
+        //Variable initialization
         String msgText = " ";
-//        String upload_url = " ";
-//        String mJSON = " ";
+        String upload_url = " ";
+        String mJSON = " ";
         String idTarget = " ";
-        try {
-            getMovieData(msgText, payload, idTarget);
-        } catch (IOException e) {
-            e.printStackTrace();
+        String eventType = payload.events[0].type;
+
+        //Get event's type
+        if (eventType.equals("join")){
+            if (payload.events[0].source.type.equals("group")){
+                replyToUser(payload.events[0].replyToken, "Hello Group");
+            }
+            if (payload.events[0].source.type.equals("room")){
+                replyToUser(payload.events[0].replyToken, "Hello Room");
+            }
+        } else if (eventType.equals("message")){    //Event's type is message
+            if (payload.events[0].source.type.equals("group")){
+                idTarget = payload.events[0].source.groupId;
+            } else if (payload.events[0].source.type.equals("room")){
+                idTarget = payload.events[0].source.roomId;
+            } else if (payload.events[0].source.type.equals("user")){
+                idTarget = payload.events[0].source.userId;
+            }
+
+            //Parsing message from user
+            if (!payload.events[0].message.type.equals("text")){
+                replyToUser(payload.events[0].replyToken, "Unknown message");
+            } else {
+                //Get movie data from OMDb API
+                msgText = payload.events[0].message.text;
+                msgText = msgText.toLowerCase();
+
+                if (!msgText.contains("bot leave")){
+                    try {
+                        getMovieData(msgText, payload, idTarget);
+                    } catch (IOException e) {
+                        System.out.println("Exception is raised ");
+                        e.printStackTrace();
+                    }
+                } else {
+                    if (payload.events[0].source.type.equals("group")){
+                        leaveGR(payload.events[0].source.groupId, "group");
+                    } else if (payload.events[0].source.type.equals("room")){
+                        leaveGR(payload.events[0].source.roomId, "room");
+                    }
+                }
+
+//                pushType(idTarget, msgText + " - " + payload.events[0].source.type);
+            }
         }
-//        String eventType = payload.events[0].type;
-//
-//        //Get event's type
-//        if (eventType.equals("join")){
-//            if (payload.events[0].source.type.equals("group")){
-//                replyToUser(payload.events[0].replyToken, "Hello Group");
-//            }
-//            if (payload.events[0].source.type.equals("room")){
-//                replyToUser(payload.events[0].replyToken, "Hello Room");
-//            }
-//        } else if (eventType.equals("message")){    //Event's type is message
-//            if (payload.events[0].source.type.equals("group")){
-//                idTarget = payload.events[0].source.groupId;
-//            } else if (payload.events[0].source.type.equals("room")){
-//                idTarget = payload.events[0].source.roomId;
-//            } else if (payload.events[0].source.type.equals("user")){
-//                idTarget = payload.events[0].source.userId;
-//            }
-//
-//            //Parsing message from user
-//            if (!payload.events[0].message.type.equals("text")){
-//                replyToUser(payload.events[0].replyToken, "Unknown message");
-//            } else {
-//                //Get movie data from OMDb API
-//                msgText = payload.events[0].message.text;
-//                msgText = msgText.toLowerCase();
-//
-//                if (!msgText.contains("bot leave")){
-//                    try {
-//                        getMovieData(msgText, payload, idTarget);
-//                    } catch (IOException e) {
-//                        System.out.println("Exception is raised ");
-//                        e.printStackTrace();
-//                    }
-//                } else {
-//                    if (payload.events[0].source.type.equals("group")){
-//                        leaveGR(payload.events[0].source.groupId, "group");
-//                    } else if (payload.events[0].source.type.equals("room")){
-//                        leaveGR(payload.events[0].source.roomId, "room");
-//                    }
-//                }
-//
-////                pushType(idTarget, msgText + " - " + payload.events[0].source.type);
-//            }
-//        }
 
         return new ResponseEntity<String>(HttpStatus.OK);
     }
@@ -169,7 +164,7 @@ public class LineBotController
 //        } finally {
 //            c.close();
 //        }
-
+//
 //        Gson mGson = new Gson();
 //        Event event = mGson.fromJson(jObjGet, Event.class);
 //        String owner = event.getData().get(0).getOwner_display_name();
@@ -180,6 +175,7 @@ public class LineBotController
 //        String address = event.getData().get(0).getAddress();
 //        String image = event.getData().get(0).getImage_path();
 //        String msgToUser = " ";
+
         //Check user's request
         if (userTxt.contains("name")){
             pushMessage(targetID, "name");
@@ -189,7 +185,7 @@ public class LineBotController
 //        } else if (userTxt.contains("description")){
 //            pushMessage(targetID, description);
 //        } else if (userTxt.contains("time")){
-//            pushMessage(targetID, time);
+//            pushMessage(targetID, "time");
 //        } else if (userTxt.contains("address")){
 //            pushMessage(targetID, address);
 //        } else if (userTxt.contains("owner")){
@@ -198,7 +194,7 @@ public class LineBotController
 //        else if (userTxt.contains("event")){
 //            carouselForUser(image, ePayload.events[0].source.userId, owner, link);
 //        }
-
+//
 //        System.out.println("Message to user: " + image);
 
 //        //Check whether response successfully retrieve or not
