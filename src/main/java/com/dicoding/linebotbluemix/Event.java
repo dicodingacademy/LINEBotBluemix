@@ -1,4 +1,4 @@
-package org.garethevans.example;
+package com.dicoding.linebotbluemix;
 
 import java.util.List;
 

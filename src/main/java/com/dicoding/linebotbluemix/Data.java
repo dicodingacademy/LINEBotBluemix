@@ -1,4 +1,4 @@
-package org.garethevans.example;
+package com.dicoding.linebotbluemix;
 
 /**
  * Created by root on 1/27/17.

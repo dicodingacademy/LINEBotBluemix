@@ -1,4 +1,4 @@
-package org.garethevans.example;
+package com.dicoding.linebotbluemix;
 
 public class Source {
     public String userId;

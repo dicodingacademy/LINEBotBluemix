@@ -1,4 +1,4 @@
-package org.garethevans.example;
+package com.dicoding.linebotbluemix;
 
 public class Events {
     public String type;
