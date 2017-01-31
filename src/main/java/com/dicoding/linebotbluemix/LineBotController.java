@@ -32,10 +32,10 @@ public class LineBotController
     @ResponseBody
     public ResponseEntity<String> push(@RequestHeader("X-Line-Signature") String aXLineSignature,
                                        @RequestBody String aPayload) {
-        Gson gson = new Gson();
-        Payload payload = gson.fromJson(aPayload, Payload.class);
-        String idTarget = payload.events[0].source.userId;
-        pushMessage(idTarget, "Hi, Push Message berhasil!");
+//        Gson gson = new Gson();
+//        Payload payload = gson.fromJson(aPayload, Payload.class);
+//        String idTarget = payload.events[0].source.userId;
+        pushMessage("U813518120f569991d265306668212846", "Hi, Push Message berhasil!");
         return new ResponseEntity<String>(HttpStatus.OK);
     }
 
